@@ -11,14 +11,16 @@ class Config {
  public:
   Config();
   void parse_input_file(string fname);
-  void parse_search_file(string fname);
-  void parse_site_file(string fname);
+  void parse_search_file();
+  void parse_site_file();
  private:
   int period_fetch;
   int num_fetch;
   int num_parse;
   string search_file;
   string site_file;
+  vector<string> searches;
+  vector<string> sites;
 };
 
 //set default arguments
@@ -52,5 +54,21 @@ void Config::parse_input_file(string fname){
       search_file = arg;
     else if(param == "SITE_FILE")
       site_file = arg;
+  }
+}
+
+void Config::parse_search_file(){
+  ifstream infile(search_file.c_str());
+  string line;
+  while(getline(infile, line)){
+    searches.push_back(line);
+  }
+}
+
+void Config::parse_site_file(){
+  ifstream infile(site_file.c_str());
+  string line;
+  while(getline(infile, line)){
+    sites.push_back(line);
   }
 }
