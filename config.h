@@ -9,6 +9,7 @@ using namespace std;
 
 class Config {
  public:
+  Config();
   void parse_input_file(string fname);
   void parse_search_file(string fname);
   void parse_site_file(string fname);
@@ -20,44 +21,36 @@ class Config {
   string site_file;
 };
 
+//set default arguments
+Config::Config(){
+  period_fetch = 180;
+  num_fetch = 1;
+  num_parse = 1;
+  search_file = "Search.txt";
+  site_file = "Sites.txt";
+}
+
 void Config::parse_input_file(string fname){
   ifstream infile(fname.c_str());
   string line;
   while(getline(infile, line)){
-    string word1 = '\0';
-    string word2 = '\0';
+    size_t found = line.find("=");
     string param, arg;
-    for(int i=0; i<line.length(); i++){
-      if(line[i] == '='){
-	param = word1;
-	for(int j=i; j < line.length(); j++){
-	  word2 = word2 + line[j];
-	}
-	arg = word2;
-	if(param == "PERIOD_FETCH"){
-	  period_fetch = atoi(arg.c_str());
-	  cout << "period fetch" << endl;
-	}
-	/*switch(param){
-	case "PERIOD_FETCH":
-	  cout << "DOPE" << endl;
-	  break;
-	default:
-	  cout << "no" << endl;
-	  }*/
-	return;
-      }
-      else{
-	word1 = word1 + line[i];
-      }
+    for(int i = 0; i < found; i++){
+      param = param + line[i];
     }
-    /*char input[1000] = line.c_str();
-    char *input[] = {line};
-    char *token = strtok(input, "=");
-    while(token != NULL){
-      cout << token << " ";
-      token = strtok(NULL, " ");
+    for(int i = found + 1; i < line.size(); i++){
+      arg = arg + line[i];
     }
-    cout << endl;*/
+    if(param == "PERIOD_FETCH")
+      period_fetch = atoi(arg.c_str());
+    else if(param == "NUM_FETCH")
+      num_fetch = atoi(arg.c_str());
+    else if(param == "NUM_PARSE")
+      num_parse = atoi(arg.c_str());
+    else if(param == "SEARCH_FILE")
+      search_file = arg;
+    else if(param == "SITE_FILE")
+      site_file = arg;
   }
 }
