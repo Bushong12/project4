@@ -13,5 +13,6 @@ int main(int argc, char *argv[]){
   run.parse_input_file(fname);
   run.parse_search_file();
   run.parse_site_file();
+  run.get_site();
   return 1;
 }
