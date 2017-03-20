@@ -39,6 +39,7 @@ class Config {
   void parse_search_file();
   void parse_site_file();
   void get_site();
+  void find_words(string s);
  private:
   int period_fetch;
   int num_fetch;
@@ -109,6 +110,7 @@ void Config::get_site(){
   chunk.size = 0;
   curl_global_init(CURL_GLOBAL_ALL);
   curl_handle = curl_easy_init();
+  //NOTE - don't hardcode url
   curl_easy_setopt(curl_handle, CURLOPT_URL, "http://www.nd.edu/");
   curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
@@ -119,11 +121,23 @@ void Config::get_site(){
     fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
   }
   else{
-    printf("%s", chunk.memory);
-    printf("%lu bytes retrieved\n", (long)chunk.size);
+    //    printf("%s", chunk.memory);
+    //    printf("%lu bytes retrieved\n", (long)chunk.size);
+    find_words(chunk.memory);
   }
   curl_easy_cleanup(curl_handle);
   free(chunk.memory);
   curl_global_cleanup();
 
+}
+
+void Config::find_words(string s){
+  int count = 0;
+  //NOTE: will have to iterate through vector of words
+  size_t n = s.find("Notre", 0);
+  while(n != string::npos){
+    count++;
+    n = s.find("Notre", n+1);
+  }
+  cout << count << endl;
 }
