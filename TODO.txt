@@ -1,0 +1,5 @@
+- Print to output file (Time, site, phrase, count) 
+  	- this should probably be a member function
+- implement the timing part (probably in main)
+- implement threading
+  - 
