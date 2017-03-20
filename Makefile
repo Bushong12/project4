@@ -5,3 +5,6 @@ main: main.o
 
 main.o: main.cpp
 	g++ -Wall -c main.cpp -o main.o
+
+clean: 
+	rm -f *.o main
