@@ -39,7 +39,7 @@ class Config {
   void parse_search_file();
   void parse_site_file();
   void get_site();
-  void find_words(string s, int name);
+  void find_words(string s);
   int write_to_output(string num);
  private:
   int period_fetch;
@@ -127,7 +127,7 @@ void Config::get_site(){
     else{
       //    printf("%s", chunk.memory);
       //    printf("%lu bytes retrieved\n", (long)chunk.size);
-      find_words(chunk.memory, i + 1);
+      find_words(chunk.memory);
     }
     curl_easy_cleanup(curl_handle);
     free(chunk.memory);
@@ -135,7 +135,7 @@ void Config::get_site(){
   }
 }
 
-void Config::find_words(string s, int name){
+void Config::find_words(string s){
   int count = 0;
   string word;
   for (int i = 0; i < searches.size(); i++) {
@@ -147,7 +147,7 @@ void Config::find_words(string s, int name){
     }
     searches_counts.push_back(count);
   }
-  write_to_output(to_string(name));
+  write_to_output("1");
 }
 
 //not sure if there should be separate fcn for this (confused bout threading)
