@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 #include <string.h>
+#include <errno.h>
 using namespace std;
 
 struct MemoryStruct {
@@ -139,6 +140,7 @@ void Config::find_words(string s){
   int count = 0;
   string word;
   for (int i = 0; i < searches.size(); i++) {
+    count = 0;
     word = searches[i];
     size_t n = s.find(word, 0);
     while(n != string::npos){
@@ -153,7 +155,7 @@ void Config::find_words(string s){
 //not sure if there should be separate fcn for this (confused bout threading)
 int Config::write_to_output(string name){
   string outfile = name + ".csv";
-  ofstream outputFile(outfile);
+  ofstream outputFile(outfile.c_str());
   if (outputFile.is_open()) {
     for (int i = 0; i < searches_counts.size(); i++) {
       outputFile << searches_counts[i] << " " << searches[i] << endl;
