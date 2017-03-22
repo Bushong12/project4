@@ -40,7 +40,7 @@ class Config {
   void parse_site_file();
   void get_site();
   void find_words(string s);
-  void write_to_output(int num, int count, string word);
+  int write_to_output(string num, int count, string word);
  private:
   int period_fetch;
   int num_fetch;
@@ -141,11 +141,21 @@ void Config::find_words(string s){
     count++;
     n = s.find(word, n+1);
   }
-  write_to_output(1, count, word);
+  write_to_output("1", count, word);
   //cout << count << endl;
 }
 
 //not sure if there should be separate fcn for this (confused bout threading)
-void Config::write_to_output(int name, int count, string word){
-  ofstream outputFile("%d.csv", name);
+int Config::write_to_output(string name, int count, string word){
+  string outfile = name + ".csv";
+  ofstream outputFile(outfile);
+  if (outputFile.is_open()) {
+    outputFile << count << " " << word << endl;
+    outputFile.close();
+  }
+  else {
+    fprintf(stderr,"config: couldn't write to %s: %s\n",outfile.c_str(),strerror(errno));
+    return 1;
+  }
+  return 0;
 }
