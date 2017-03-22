@@ -40,6 +40,7 @@ class Config {
   void parse_site_file();
   void get_site();
   void find_words(string s);
+  void write_to_output(int num, int count, string word);
  private:
   int period_fetch;
   int num_fetch;
@@ -134,10 +135,17 @@ void Config::get_site(){
 void Config::find_words(string s){
   int count = 0;
   //NOTE: will have to iterate through vector of words
-  size_t n = s.find("Notre", 0);
+  string word = "Notre";
+  size_t n = s.find(word, 0);
   while(n != string::npos){
     count++;
-    n = s.find("Notre", n+1);
+    n = s.find(word, n+1);
   }
-  cout << count << endl;
+  write_to_output(1, count, word);
+  //cout << count << endl;
+}
+
+//not sure if there should be separate fcn for this (confused bout threading)
+void Config::write_to_output(int name, int count, string word){
+  ofstream outputFile("%d.csv", name);
 }
