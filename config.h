@@ -68,10 +68,10 @@ void Config::parse_input_file(string fname){
   while(getline(infile, line)){
     size_t found = line.find("=");
     string param, arg;
-    for(int i = 0; i < found; i++){
+    for(size_t i = 0; i < found; i++){
       param = param + line[i];
     }
-    for(int i = found + 1; i < line.size(); i++){
+    for(size_t i = found + 1; i < line.size(); i++){
       arg = arg + line[i];
     }
     if(param == "PERIOD_FETCH")
@@ -104,12 +104,12 @@ void Config::parse_site_file(){
 }
 
 void Config::get_site(){
-  for (int i = 0; i < sites.size(); i++) {
+  for (size_t i = 0; i < sites.size(); i++) {
     CURL *curl_handle;
     CURLcode res;
 
     struct MemoryStruct chunk;
-    cout << sites[i] << endl;
+    //cout << sites[i] << endl;
 
     chunk.memory = (char*)malloc(1);
     chunk.size = 0;
@@ -139,7 +139,7 @@ void Config::get_site(){
 void Config::find_words(string s){
   int count = 0;
   string word;
-  for (int i = 0; i < searches.size(); i++) {
+  for (size_t i = 0; i < searches.size(); i++) {
     count = 0;
     word = searches[i];
     size_t n = s.find(word, 0);
@@ -157,7 +157,7 @@ int Config::write_to_output(string name){
   string outfile = name + ".csv";
   ofstream outputFile(outfile.c_str());
   if (outputFile.is_open()) {
-    for (int i = 0; i < searches_counts.size(); i++) {
+    for (size_t i = 0; i < searches_counts.size(); i++) {
       outputFile << searches_counts[i] << " " << searches[i] << endl;
     }
     outputFile.close();
