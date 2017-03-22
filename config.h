@@ -36,6 +36,8 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 class Config {
  public:
   Config();
+  int get_fetch_threads();
+  int get_parse_threads();
   void parse_input_file(string fname);
   void parse_search_file();
   void parse_site_file();
@@ -60,6 +62,14 @@ Config::Config(){
   num_parse = 1;
   search_file = "Search.txt";
   site_file = "Sites.txt";
+}
+
+int Config::get_fetch_threads(){
+  return num_fetch;
+}
+
+int Config::get_parse_threads(){
+  return num_parse;
 }
 
 void Config::parse_input_file(string fname){
