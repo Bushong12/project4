@@ -41,9 +41,12 @@ class Config {
   void parse_input_file(string fname);
   void parse_search_file();
   void parse_site_file();
-  void get_site();
+  void get_site(string this_site);
   void find_words(string s);
   int write_to_output(string num);
+  void push_sites_to_queue();
+  vector<string> queue_sites;
+  vector<string> queue_data;
  private:
   int period_fetch;
   int num_fetch;
@@ -114,7 +117,7 @@ void Config::parse_site_file(){
   }
 }
 
-void Config::get_site(){
+void Config::get_site(string this_site){
   for (size_t i = 0; i < sites.size(); i++) {
     CURL *curl_handle;
     CURLcode res;
@@ -127,7 +130,8 @@ void Config::get_site(){
     curl_global_init(CURL_GLOBAL_ALL);
     curl_handle = curl_easy_init();
     //NOTE - don't hardcode url
-    curl_easy_setopt(curl_handle, CURLOPT_URL, sites[i].c_str());
+    //curl_easy_setopt(curl_handle, CURLOPT_URL, sites[i].c_str());
+    curl_easy_setopt(curl_handle, CURLOPT_URL, this_site.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
@@ -187,4 +191,10 @@ int Config::write_to_output(string name){
     return 1;
   }
   return 0;
+}
+
+void Config::push_sites_to_queue() {
+    for (size_t i = 0; i < sites.size(); i++) {
+	queue_sites.push_back(sites[i]);
+    }
 }

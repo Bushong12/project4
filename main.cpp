@@ -29,6 +29,8 @@ int main(int argc, char *argv[]){
  
   run.parse_search_file();
   run.parse_site_file();
-  run.get_site();
+  
+  // will need to have this in a for loop for all the sites in the queue
+  //run.get_site();
   return 1;
 }
