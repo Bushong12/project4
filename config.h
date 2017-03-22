@@ -39,8 +39,8 @@ class Config {
   void parse_search_file();
   void parse_site_file();
   void get_site();
-  void find_words(string s);
-  int write_to_output(string num, int count, string word);
+  void find_words(string s, int name);
+  int write_to_output(string num);
  private:
   int period_fetch;
   int num_fetch;
@@ -48,6 +48,7 @@ class Config {
   string search_file;
   string site_file;
   vector<string> searches;
+  vector<int> searches_counts;
   vector<string> sites;
 };
 
@@ -102,55 +103,61 @@ void Config::parse_site_file(){
 }
 
 void Config::get_site(){
-  CURL *curl_handle;
-  CURLcode res;
+  for (int i = 0; i < sites.size(); i++) {
+    CURL *curl_handle;
+    CURLcode res;
 
-  struct MemoryStruct chunk;
+    struct MemoryStruct chunk;
+    cout << sites[i] << endl;
 
-  chunk.memory = (char*)malloc(1);
-  chunk.size = 0;
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl_handle = curl_easy_init();
-  //NOTE - don't hardcode url
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://www.nd.edu/");
-  curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
-  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-  res = curl_easy_perform(curl_handle);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+    chunk.memory = (char*)malloc(1);
+    chunk.size = 0;
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl_handle = curl_easy_init();
+    //NOTE - don't hardcode url
+    curl_easy_setopt(curl_handle, CURLOPT_URL, sites[i].c_str());
+    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    res = curl_easy_perform(curl_handle);
+    if(res != CURLE_OK) {
+      fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+    }
+    else{
+      //    printf("%s", chunk.memory);
+      //    printf("%lu bytes retrieved\n", (long)chunk.size);
+      find_words(chunk.memory, i + 1);
+    }
+    curl_easy_cleanup(curl_handle);
+    free(chunk.memory);
+    curl_global_cleanup();
   }
-  else{
-    //    printf("%s", chunk.memory);
-    //    printf("%lu bytes retrieved\n", (long)chunk.size);
-    find_words(chunk.memory);
-  }
-  curl_easy_cleanup(curl_handle);
-  free(chunk.memory);
-  curl_global_cleanup();
-
 }
 
-void Config::find_words(string s){
+void Config::find_words(string s, int name){
   int count = 0;
-  //NOTE: will have to iterate through vector of words
-  string word = "Notre";
-  size_t n = s.find(word, 0);
-  while(n != string::npos){
-    count++;
-    n = s.find(word, n+1);
+  string word;
+  for (int i = 0; i < searches.size(); i++) {
+    word = searches[i];
+    size_t n = s.find(word, 0);
+    while(n != string::npos){
+      count++;
+      n = s.find(word, n+1);
+    }
+    searches_counts.push_back(count);
   }
-  write_to_output("1", count, word);
-  //cout << count << endl;
+  write_to_output(to_string(name));
 }
 
 //not sure if there should be separate fcn for this (confused bout threading)
-int Config::write_to_output(string name, int count, string word){
+int Config::write_to_output(string name){
   string outfile = name + ".csv";
   ofstream outputFile(outfile);
   if (outputFile.is_open()) {
-    outputFile << count << " " << word << endl;
+    for (int i = 0; i < searches_counts.size(); i++) {
+      outputFile << searches_counts[i] << " " << searches[i] << endl;
+    }
     outputFile.close();
   }
   else {
