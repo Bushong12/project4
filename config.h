@@ -91,6 +91,7 @@ void Config::parse_search_file(){
   ifstream infile(search_file.c_str());
   string line;
   while(getline(infile, line)){
+    //cout << line << endl;
     searches.push_back(line);
   }
 }
@@ -147,6 +148,7 @@ void Config::find_words(string s){
       count++;
       n = s.find(word, n+1);
     }
+    //cout << count << endl;
     searches_counts.push_back(count);
   }
   write_to_output("1");
@@ -157,8 +159,16 @@ int Config::write_to_output(string name){
   string outfile = name + ".csv";
   ofstream outputFile(outfile.c_str());
   if (outputFile.is_open()) {
+    size_t j = 0;
     for (size_t i = 0; i < searches_counts.size(); i++) {
-      outputFile << searches_counts[i] << " " << searches[i] << endl;
+        //cout << searches[i] <<  endl;
+        outputFile << searches_counts[i] << " " << searches[j] << endl;
+    	if (j == searches.size()-1) {
+	    j = 0;
+	}
+	else {
+	    j++;
+	}
     }
     outputFile.close();
   }
