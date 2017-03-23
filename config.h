@@ -18,7 +18,11 @@ queue<string> queue_data;
 vector<string> searches;
 vector<int> searches_counts;
 vector<string> sites;
-
+pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
+pthread_cond_t full = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex;
+int count = 0;
+int datacount = 0;
 
 struct MemoryStruct {
   char *memory;
@@ -124,71 +128,74 @@ void Config::parse_site_file(){
 }
 
 void * get_site(void * args){
-  for (size_t i = 0; i < sites.size(); i++) {
-    CURL *curl_handle;
-    CURLcode res;
-    
-    struct MemoryStruct chunk;
-    //cout << sites[i] << endl;
+  CURL *curl_handle;
+  CURLcode res;
+  
+  struct MemoryStruct chunk;
+  
+  chunk.memory = (char*)malloc(1);
+  chunk.size = 0;
+  curl_global_init(CURL_GLOBAL_ALL);
+  curl_handle = curl_easy_init();
 
-    chunk.memory = (char*)malloc(1);
-    chunk.size = 0;
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl_handle = curl_easy_init();
-    //NOTE - don't hardcode url
-    curl_easy_setopt(curl_handle, CURLOPT_URL, sites[i].c_str());
-    //curl_easy_setopt(curl_handle, CURLOPT_URL, this_site.c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    res = curl_easy_perform(curl_handle);
-    if(res != CURLE_OK) {
-      fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-    }
-    else{
-      //    printf("%s", chunk.memory);
-      //    printf("%lu bytes retrieved\n", (long)chunk.size);
-      
-      //push to queue_data rather than sending straight to find_words
-      // MUTEX LOCK
-      pthread_mutex_t mut;
-      pthread_mutex_lock(&mut);
-      queue_data.push(chunk.memory);
-      pthread_mutex_unlock(&mut);
-      // MUTEX UNLOCK
-      
-      //find_words(chunk.memory);
-    }
-    curl_easy_cleanup(curl_handle);
-    //    free(chunk.memory);
-    curl_global_cleanup();
+  //consumer
+  pthread_mutex_lock(&mutex);
+  while(count == 0)
+    pthread_cond_wait(&full, &mutex);
+  string site = queue_sites.back(); //check that this shoudl be back and not top
+  queue_sites.pop();
+  count--; //number of sites decrements
+  pthread_cond_broadcast(&empty);
+  pthread_mutex_unlock(&mutex);
+
+  curl_easy_setopt(curl_handle, CURLOPT_URL, site.c_str()); //fetch site
+  curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+  res = curl_easy_perform(curl_handle);
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
   }
-
-  // pthread_exit(NULL);    // do we need this???
+  else{
+    //producer
+    pthread_mutex_lock(&mutex);
+    //condition variable???
+    //pthread_cond_wait(&fill, &mutex);
+    queue_data.push(chunk.memory);
+    datacount++;
+    pthread_cond_broadcast(&empty);
+    pthread_mutex_unlock(&mutex);
+  }
+  curl_easy_cleanup(curl_handle);
+  //    free(chunk.memory);
+  curl_global_cleanup();
+  //}
+  
   return 0;
 }
 
 void * find_words(void * args){
-// void * Config::find_words(void * args){
-  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  //consumer
   pthread_mutex_lock(&mutex);
+  while(datacount==0)
+    pthread_cond_wait(&full, &mutex);
   string s = queue_data.back();
   queue_data.pop();
+  datacount--;
+  pthread_cond_broadcast(&empty);
   pthread_mutex_unlock(&mutex);
+
   int count = 0;
   string word;
   for (size_t i = 0; i < queue_search.size(); i++) {
     count = 0;
-    //    word = queue_search.at(i);
     word = searches[i];
     size_t n = s.find(word, 0);
     while(n != string::npos){
       count++;
       n = s.find(word, n+1);
     }
-    //cout << count << endl;
-    // write to stdout for now
     cout << count << " " << word << endl;
     searches_counts.push_back(count);
   }
@@ -203,7 +210,6 @@ int Config::write_to_output(string name){
   if (outputFile.is_open()) {
     size_t j = 0;
     for (size_t i = 0; i < searches_counts.size(); i++) {
-        //cout << searches[i] <<  endl;
         outputFile << searches_counts[i] << " " << searches[j] << endl;
     	if (j == searches.size()-1) {
 	    j = 0;
@@ -224,6 +230,7 @@ int Config::write_to_output(string name){
 void Config::push_sites_to_queue() {
     for (size_t i = 0; i < sites.size(); i++) {
     	queue_sites.push(sites[i]);
+	count++;
     }
 }
 
