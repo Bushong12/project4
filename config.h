@@ -161,7 +161,7 @@ void * get_site(void * args){
       //find_words(chunk.memory);
     }
     curl_easy_cleanup(curl_handle);
-    free(chunk.memory);
+    //    free(chunk.memory);
     curl_global_cleanup();
   }
 
