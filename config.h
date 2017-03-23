@@ -57,11 +57,8 @@ class Config {
   void parse_input_file(string fname);
   void parse_search_file();
   void parse_site_file();
-  //  void * get_site(void * args);
-  //void find_words(string s);
-  //void * find_words(void * args);
   int write_to_output(string num);
-  void push_sites_to_queue();
+  //  void push_sites_to_queue();
   void push_search_to_queue();
  private:
   int period_fetch;
@@ -129,7 +126,7 @@ void Config::parse_site_file(){
   }
 }
 
-void * get_site(void * args){
+void get_site(string site){
   cout << "inside get_site" << endl;
   CURL *curl_handle;
   CURLcode res;
@@ -138,28 +135,16 @@ void * get_site(void * args){
   
   chunk.memory = (char*)malloc(1);
   chunk.size = 0;
-  //  curl_global_init(CURL_GLOBAL_ALL);
   curl_handle = curl_easy_init();  
-
-  //consumer
-  pthread_mutex_lock(&mutex);
-  while(count == 0){
-    cout << "waiting inside get_site consumer... " << endl;
-    pthread_cond_wait(&consumer_signal, &mutex);
-  }
-  string site = queue_sites.back(); //check that this shoudl be back and not top
-  queue_sites.pop();
-  count--; //number of sites decrements
-  cout << "about to broadcast in get_site consumer" << endl;
-  //pthread_cond_broadcast(&producer_signal);
-  pthread_mutex_unlock(&mutex);
   
   curl_easy_setopt(curl_handle, CURLOPT_URL, site.c_str()); //fetch site
   curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+  cout << "before res"<<endl;
   res = curl_easy_perform(curl_handle);
+  cout << "after res"<<endl;
   if(res != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
   }
@@ -169,15 +154,33 @@ void * get_site(void * args){
     cout << "inside get_site producer"<<endl;
     queue_data.push(chunk.memory);
     datacount++;
+    cout << chunk.memory << endl; //debugging
     cout << "about to broadcast in get_site producer"<<endl;
     pthread_cond_broadcast(&producer_signal);
+    cout << "broadcasted in get_site producer"<<endl;
     pthread_mutex_unlock(&mutex);
   }
   curl_easy_cleanup(curl_handle);
   //    free(chunk.memory);
-  //  curl_global_cleanup();
-  //}
-  
+}
+
+void * get_site_name(void * args){
+
+  //consumer
+  pthread_mutex_lock(&mutex);
+  //  while(count == 0){
+  while(queue_sites.empty()){
+    cout << "waiting inside get_site consumer... " << endl;
+    pthread_cond_wait(&consumer_signal, &mutex);
+  }
+  string site = queue_sites.front(); //check that this shoudl be back and not top
+  cout << "URL: "<< site << endl;
+  queue_sites.pop();
+  //  count--; //number of sites decrements
+  //pthread_cond_broadcast(&producer_signal);
+  pthread_mutex_unlock(&mutex);
+
+  get_site(site);
   return 0;
 }
 
@@ -185,7 +188,8 @@ void * find_words(void * args){
   //consumer
   cout << "inside find_words" << endl;
   pthread_mutex_lock(&mutex);
-  while(datacount==0){
+  //while(datacount==0){
+  while(queue_data.empty()){
     cout << "waiting in find_words"<<endl;
     pthread_cond_wait(&producer_signal, &mutex);
   }
@@ -237,12 +241,15 @@ int Config::write_to_output(string name){
   return 0;
 }
 
-void Config::push_sites_to_queue() {
+void push_sites_to_queue() {
+  pthread_mutex_lock(&mutex);
   for (size_t i = 0; i < sites.size(); i++) {
     cout << "pushing site to queue" << endl;
     queue_sites.push(sites[i]);
-    //count++;
+    count++;
   }
+  pthread_cond_broadcast(&consumer_signal);
+  pthread_mutex_unlock(&mutex);
 }
 
 void Config::push_search_to_queue() {

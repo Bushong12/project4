@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
   //  pthread_mutex_t mutex;
   for(int i=0; i<run.get_fetch_threads(); i++){
     cout << "creating fetch thread"<<endl;
-    pthread_create(&threads_f[i], NULL, get_site, NULL);
+    pthread_create(&threads_f[i], NULL, get_site_name, NULL);
   }
   for(int j=0; j<run.get_parse_threads(); j++){
     cout << "creating parse thread"<<endl;
@@ -43,11 +43,12 @@ int main(int argc, char *argv[]){
   
 
   //start timer loop
-  pthread_mutex_lock(&mutex);
-  run.push_sites_to_queue(); //populate sites queue
-  count++;
-  pthread_cond_broadcast(&consumer_signal);
-  pthread_mutex_unlock(&mutex);
+  push_sites_to_queue();
+  //pthread_mutex_lock(&mutex);
+  //run.push_sites_to_queue(); //populate sites queue
+  //  count++;
+  //pthread_cond_broadcast(&consumer_signal);
+  //pthread_mutex_unlock(&mutex);
 
 
   
