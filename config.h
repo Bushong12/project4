@@ -8,6 +8,7 @@
 #include <curl/curl.h>
 #include <string.h>
 #include <errno.h>
+#include <queue>
 using namespace std;
 
 struct MemoryStruct {
@@ -41,12 +42,15 @@ class Config {
   void parse_input_file(string fname);
   void parse_search_file();
   void parse_site_file();
-  void get_site(string this_site);
+  void * get_site(void * args);
   void find_words(string s);
+  // void * find_words(void * args);
   int write_to_output(string num);
   void push_sites_to_queue();
-  vector<string> queue_sites;
-  vector<string> queue_data;
+  void push_search_to_queue();
+  queue<string> queue_sites;
+  queue<string> queue_search;
+  queue<string> queue_data;
  private:
   int period_fetch;
   int num_fetch;
@@ -104,7 +108,6 @@ void Config::parse_search_file(){
   ifstream infile(search_file.c_str());
   string line;
   while(getline(infile, line)){
-    //cout << line << endl;
     searches.push_back(line);
   }
 }
@@ -117,11 +120,11 @@ void Config::parse_site_file(){
   }
 }
 
-void Config::get_site(string this_site){
+void * Config::get_site(void * args){
   for (size_t i = 0; i < sites.size(); i++) {
     CURL *curl_handle;
     CURLcode res;
-
+    
     struct MemoryStruct chunk;
     //cout << sites[i] << endl;
 
@@ -130,8 +133,8 @@ void Config::get_site(string this_site){
     curl_global_init(CURL_GLOBAL_ALL);
     curl_handle = curl_easy_init();
     //NOTE - don't hardcode url
-    //curl_easy_setopt(curl_handle, CURLOPT_URL, sites[i].c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_URL, this_site.c_str());
+    curl_easy_setopt(curl_handle, CURLOPT_URL, sites[i].c_str());
+    //curl_easy_setopt(curl_handle, CURLOPT_URL, this_site.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
@@ -143,15 +146,25 @@ void Config::get_site(string this_site){
     else{
       //    printf("%s", chunk.memory);
       //    printf("%lu bytes retrieved\n", (long)chunk.size);
+      
+      //push to queue_data rather than sending straight to find_words
+      // MUTEX LOCK
+      // queue_data.push(chunk.memory);
+      // MUTEX UNLOCK
+      
       find_words(chunk.memory);
     }
     curl_easy_cleanup(curl_handle);
     free(chunk.memory);
     curl_global_cleanup();
   }
+
+  // pthread_exit(NULL);    // do we need this???
+  return 0;
 }
 
 void Config::find_words(string s){
+// void * Config::find_words(void * args){
   int count = 0;
   string word;
   for (size_t i = 0; i < searches.size(); i++) {
@@ -163,9 +176,11 @@ void Config::find_words(string s){
       n = s.find(word, n+1);
     }
     //cout << count << endl;
+    // write to stdout for now
+    cout << count << " " << word << endl;
     searches_counts.push_back(count);
   }
-  write_to_output("1");
+  //write_to_output("1");
 }
 
 //not sure if there should be separate fcn for this (confused bout threading)
@@ -195,6 +210,12 @@ int Config::write_to_output(string name){
 
 void Config::push_sites_to_queue() {
     for (size_t i = 0; i < sites.size(); i++) {
-	queue_sites.push_back(sites[i]);
+    	queue_sites.push(sites[i]);
+    }
+}
+
+void Config::push_search_to_queue() {
+    for (size_t i = 0; i < searches.size(); i++) {
+        queue_search.push(searches[i]);
     }
 }

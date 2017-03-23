@@ -29,8 +29,35 @@ int main(int argc, char *argv[]){
  
   run.parse_search_file();
   run.parse_site_file();
+ 
+  //never-ending while loop
+  // WHEN THREADS ARE TRIGGERED
+  // MUTEX LOCK
+  run.push_sites_to_queue();
+  // MUTEX UNLOCK
+  //
+  // MUTEX LOCK
+  run.push_search_to_queue();
+  // MUTEX UNLOCK
   
-  // will need to have this in a for loop for all the sites in the queue
+  for (int i = 0; i < num_fetch; i++) {
+
+      // Start up thread, if threads < config file limit
+      //pthread_create(&threads_f[i], NULL, run.get_site, (void *)(something));
+      // need to pass run.queue_sites.pop()
+  }
+
+  for (int i = 0; i < num_parse; i++) {
+      // MUTEX LOCK
+      //run.queue_data.pop()
+      // MUTEX UNLOCK
+      //
+      // Start up thread, if threads < config file limit
+      // pthread_create(&threads_p[i], NULL, run.find_words, (void *)(something));     
+      // need to pass run.queue_data.pop()
+  }
+  
+
   //run.get_site();
   return 1;
 }
