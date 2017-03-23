@@ -41,9 +41,9 @@ int main(int argc, char *argv[]){
     cout << "creating parse thread"<<endl;
     pthread_create(&threads_p[j], NULL, find_words, NULL);
   }
-  for(;;){
-
-    for(int i=0; i < NUM_SECONDS; i++){ usleep(1000 * 1000); }
+  //  for(;;){
+  while(1){
+  //    for(int i=0; i < NUM_SECONDS; i++){ usleep(1000 * 1000); }
     //start timer loop
     push_sites_to_queue();
     //pthread_mutex_lock(&mutex);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
     //pthread_cond_broadcast(&consumer_signal);
     //pthread_mutex_unlock(&mutex);
     
-    
+    sleep(5);
     //  cout << "hi"<<endl;
   }
   //free(threads_f);
