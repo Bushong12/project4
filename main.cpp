@@ -7,6 +7,7 @@
 #define MAX_THREAD 8
 
 int main(int argc, char *argv[]){
+  curl_global_init(CURL_GLOBAL_ALL);
   pthread_t *threads_f;
   pthread_t *threads_p;
 
@@ -30,40 +31,28 @@ int main(int argc, char *argv[]){
 
   threads_f = (pthread_t *)malloc(num_fetch*sizeof(*threads_f));
   threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
-  pthread_mutex_t mutex;
+  //  pthread_mutex_t mutex;
   for(int i=0; i<run.get_fetch_threads(); i++){
     cout << "creating fetch thread"<<endl;
     pthread_create(&threads_f[i], NULL, get_site, NULL);
   }
   for(int j=0; j<run.get_parse_threads(); j++){
     cout << "creating parse thread"<<endl;
-    pthread_create(&threads_p[0], NULL, find_words, NULL);
+    pthread_create(&threads_p[j], NULL, find_words, NULL);
   }
   
 
   //start timer loop
   pthread_mutex_lock(&mutex);
   run.push_sites_to_queue(); //populate sites queue
-  //broadcast here?
   count++;
-  pthread_cond_broadcast(&empty);
+  pthread_cond_broadcast(&consumer_signal);
   pthread_mutex_unlock(&mutex);
 
 
-  //  pthread_join(threads_f[0], NULL);
-  //  pthread_join(threads_p[0], NULL);
-  
-  //  for (int i = 0; i < num_parse; i++) {
-      // MUTEX LOCK
-      //run.queue_data.pop()
-      // MUTEX UNLOCK
-      //
-      // Start up thread, if threads < config file limit
-      // pthread_create(&threads_p[i], NULL, run.find_words, (void *)(something));     
-      // need to pass run.queue_data.pop()
-  //  }
   
   free(threads_f);
   free(threads_p);
+  curl_global_cleanup();
   return 1;
 }
