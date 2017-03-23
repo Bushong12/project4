@@ -9,7 +9,16 @@
 #include <string.h>
 #include <errno.h>
 #include <queue>
+#include <pthread.h>
 using namespace std;
+
+queue<string> queue_sites;
+queue<string> queue_search;
+queue<string> queue_data;
+vector<string> searches;
+vector<int> searches_counts;
+vector<string> sites;
+
 
 struct MemoryStruct {
   char *memory;
@@ -42,24 +51,18 @@ class Config {
   void parse_input_file(string fname);
   void parse_search_file();
   void parse_site_file();
-  void * get_site(void * args);
-  void find_words(string s);
-  // void * find_words(void * args);
+  //  void * get_site(void * args);
+  //void find_words(string s);
+  //void * find_words(void * args);
   int write_to_output(string num);
   void push_sites_to_queue();
   void push_search_to_queue();
-  queue<string> queue_sites;
-  queue<string> queue_search;
-  queue<string> queue_data;
  private:
   int period_fetch;
   int num_fetch;
   int num_parse;
   string search_file;
   string site_file;
-  vector<string> searches;
-  vector<int> searches_counts;
-  vector<string> sites;
 };
 
 //set default arguments
@@ -120,7 +123,7 @@ void Config::parse_site_file(){
   }
 }
 
-void * Config::get_site(void * args){
+void * get_site(void * args){
   for (size_t i = 0; i < sites.size(); i++) {
     CURL *curl_handle;
     CURLcode res;
@@ -149,10 +152,13 @@ void * Config::get_site(void * args){
       
       //push to queue_data rather than sending straight to find_words
       // MUTEX LOCK
-      // queue_data.push(chunk.memory);
+      pthread_mutex_t mut;
+      pthread_mutex_lock(&mut);
+      queue_data.push(chunk.memory);
+      pthread_mutex_unlock(&mut);
       // MUTEX UNLOCK
       
-      find_words(chunk.memory);
+      //find_words(chunk.memory);
     }
     curl_easy_cleanup(curl_handle);
     free(chunk.memory);
@@ -163,12 +169,18 @@ void * Config::get_site(void * args){
   return 0;
 }
 
-void Config::find_words(string s){
+void * find_words(void * args){
 // void * Config::find_words(void * args){
+  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  pthread_mutex_lock(&mutex);
+  string s = queue_data.back();
+  queue_data.pop();
+  pthread_mutex_unlock(&mutex);
   int count = 0;
   string word;
-  for (size_t i = 0; i < searches.size(); i++) {
+  for (size_t i = 0; i < queue_search.size(); i++) {
     count = 0;
+    //    word = queue_search.at(i);
     word = searches[i];
     size_t n = s.find(word, 0);
     while(n != string::npos){
@@ -180,6 +192,7 @@ void Config::find_words(string s){
     cout << count << " " << word << endl;
     searches_counts.push_back(count);
   }
+  return 0;
   //write_to_output("1");
 }
 

@@ -9,7 +9,7 @@ main_g.o: main.cpp
 	g++ -Wall -c main.cpp -o main_g.o
 
 main: main.o
-	/usr/bin/g++ main.o -o main -lcurl
+	/usr/bin/g++ main.o -o main -lcurl -lpthread
 
 main.o: main.cpp
 	/usr/bin/g++ -Wall -c main.cpp -o main.o
