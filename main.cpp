@@ -32,9 +32,11 @@ int main(int argc, char *argv[]){
   threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
   pthread_mutex_t mutex;
   for(int i=0; i<run.get_fetch_threads(); i++){
+    cout << "creating fetch thread"<<endl;
     pthread_create(&threads_f[i], NULL, get_site, NULL);
   }
   for(int j=0; j<run.get_parse_threads(); j++){
+    cout << "creating parse thread"<<endl;
     pthread_create(&threads_p[0], NULL, find_words, NULL);
   }
   
@@ -43,6 +45,8 @@ int main(int argc, char *argv[]){
   pthread_mutex_lock(&mutex);
   run.push_sites_to_queue(); //populate sites queue
   //broadcast here?
+  count++;
+  pthread_cond_broadcast(&empty);
   pthread_mutex_unlock(&mutex);
 
 

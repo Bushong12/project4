@@ -138,13 +138,17 @@ void * get_site(void * args){
   curl_global_init(CURL_GLOBAL_ALL);
   curl_handle = curl_easy_init();
 
+  cout << "inside get_site" << endl;
   //consumer
   pthread_mutex_lock(&mutex);
-  while(count == 0)
+  while(count == 0){
+    cout << "waiting inside get_site ... " << endl;
     pthread_cond_wait(&full, &mutex);
+  }
   string site = queue_sites.back(); //check that this shoudl be back and not top
   queue_sites.pop();
   count--; //number of sites decrements
+  cout << "about to broadcast in get_site" << endl;
   pthread_cond_broadcast(&empty);
   pthread_mutex_unlock(&mutex);
 
@@ -177,6 +181,7 @@ void * get_site(void * args){
 
 void * find_words(void * args){
   //consumer
+  cout << "inside find_words" << endl;
   pthread_mutex_lock(&mutex);
   while(datacount==0)
     pthread_cond_wait(&full, &mutex);
@@ -228,10 +233,11 @@ int Config::write_to_output(string name){
 }
 
 void Config::push_sites_to_queue() {
-    for (size_t i = 0; i < sites.size(); i++) {
-    	queue_sites.push(sites[i]);
-	count++;
-    }
+  for (size_t i = 0; i < sites.size(); i++) {
+    cout << "pushing site to queue" << endl;
+    queue_sites.push(sites[i]);
+    //count++;
+  }
 }
 
 void Config::push_search_to_queue() {
