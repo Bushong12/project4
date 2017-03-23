@@ -33,16 +33,16 @@ int main(int argc, char *argv[]){
   threads_f = (pthread_t *)malloc(num_fetch*sizeof(*threads_f));
   threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
   //  pthread_mutex_t mutex;
-  for(int i=0; i<run.get_fetch_threads(); i++){
-    cout << "creating fetch thread"<<endl;
-    pthread_create(&threads_f[i], NULL, get_site_name, NULL);
-  }
-  for(int j=0; j<run.get_parse_threads(); j++){
-    cout << "creating parse thread"<<endl;
-    pthread_create(&threads_p[j], NULL, find_words, NULL);
-  }
   //  for(;;){
   while(1){
+    for(int i=0; i<run.get_fetch_threads(); i++){
+      cout << "creating fetch thread"<<endl;
+      pthread_create(&threads_f[i], NULL, get_site_name, NULL);
+    }
+    for(int j=0; j<run.get_parse_threads(); j++){
+      cout << "creating parse thread"<<endl;
+      pthread_create(&threads_p[j], NULL, find_words, NULL);
+    }
   //    for(int i=0; i < NUM_SECONDS; i++){ usleep(1000 * 1000); }
     //start timer loop
     push_sites_to_queue();
