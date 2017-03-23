@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <cstdlib>
 #define MAX_THREAD 8
+const int NUM_SECONDS = 10;
 
 int main(int argc, char *argv[]){
   curl_global_init(CURL_GLOBAL_ALL);
@@ -40,20 +41,22 @@ int main(int argc, char *argv[]){
     cout << "creating parse thread"<<endl;
     pthread_create(&threads_p[j], NULL, find_words, NULL);
   }
-  
+  for(;;){
 
-  //start timer loop
-  push_sites_to_queue();
-  //pthread_mutex_lock(&mutex);
-  //run.push_sites_to_queue(); //populate sites queue
-  //  count++;
-  //pthread_cond_broadcast(&consumer_signal);
-  //pthread_mutex_unlock(&mutex);
-
-
-  
-  free(threads_f);
-  free(threads_p);
+    for(int i=0; i < NUM_SECONDS; i++){ usleep(1000 * 1000); }
+    //start timer loop
+    push_sites_to_queue();
+    //pthread_mutex_lock(&mutex);
+    //run.push_sites_to_queue(); //populate sites queue
+    //  count++;
+    //pthread_cond_broadcast(&consumer_signal);
+    //pthread_mutex_unlock(&mutex);
+    
+    
+    //  cout << "hi"<<endl;
+  }
+  //free(threads_f);
+  //free(threads_p);
   curl_global_cleanup();
   return 1;
 }
