@@ -228,7 +228,6 @@ void push_sites_to_queue() {
   for (size_t i = 0; i < sites.size(); i++) {
     cout << "pushing site to queue" << endl;
     queue_sites.push(sites[i]);
-    //    count++;
   }
   pthread_cond_broadcast(&consumer_signal);
   pthread_mutex_unlock(&mutex);
