@@ -132,21 +132,25 @@ void Config::parse_site_file(){
 
 void write_to_output(string name){
   pthread_mutex_lock(&mutex);
-  while(queue_word_counts.empty()){
+  while(queue_word_counts.empty()){ // nothing to write
     pthread_cond_wait(&third_signal, &mutex);
   }
+
   cout << "writing to output"<<endl;
-  int limit = sites.size() * searches.size();
-  string outfile = name + ".csv";
-  ofstream outputFile(outfile.c_str());
+
+  //int limit = sites.size() * searches.size(); // for loop: total site/search combos 
+  int limit = searches.size();
+  string outfile = name + ".csv";             // set file name for this iteration
+  ofstream outputFile(outfile.c_str());       // initialize file
   if (outputFile.is_open()) {
     //size_t j = 0;
     //outputFile << queue_word_counts.back().first << " "<<queue_word_counts.back().second<<endl;
-    for (int i = 0; i < limit; i++) {
+    //queue_word_counts.pop();
+    for (int i = 0; i < limit; i++) {         // for each site/ word combo
         //not writing to file
-        string tmpWord = queue_word_counts.front().first;
+        string tmpWord = queue_word_counts.front().first; 
         int tmpCount = queue_word_counts.front().second;
-        //queue_word_counts.pop(); // THIS LINE IS CAUSING SEGFAULT
+        queue_word_counts.pop(); // THIS LINE IS CAUSING SEGFAULT // pops the front
         outputFile << tmpWord<<" "<<tmpCount <<endl;
         /*outputFile << searches_counts[i] << " " << searches[j] << endl;
         if (j == searches.size()-1) {
@@ -238,7 +242,7 @@ void * find_words(void * args){
     }
     //searches_counts.push_back(count);
     queue_word_counts.push(make_pair(word, count));
-    //cout << "word: "<<word<<" count: "<<count<<endl;
+    cout << "word: "<<word<<" count: "<<count<<endl;
     //cout << queue_word_counts.back().first << " "<<queue_word_counts.back().second<<endl;
   }
   pthread_cond_broadcast(&third_signal);
