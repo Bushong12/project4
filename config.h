@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include <vector>
 #include <stdio.h>
@@ -21,8 +22,7 @@ vector<string> sites;
 pthread_cond_t producer_signal = PTHREAD_COND_INITIALIZER;
 pthread_cond_t consumer_signal = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex;
-
-//curl_global_init(CURL_GLOBAL_ALL);
+int numFile = 0;
 
 struct MemoryStruct {
   char *memory;
@@ -55,8 +55,7 @@ class Config {
   void parse_input_file(string fname);
   void parse_search_file();
   void parse_site_file();
-  int write_to_output(string num);
-  //  void push_sites_to_queue();
+  //  int write_to_output(string num);
   void push_search_to_queue();
  private:
   int period_fetch;
@@ -124,6 +123,29 @@ void Config::parse_site_file(){
   }
 }
 
+int write_to_output(string name){
+  string outfile = name + ".csv";
+  ofstream outputFile(outfile.c_str());
+  if (outputFile.is_open()) {
+    size_t j = 0;
+    for (size_t i = 0; i < searches_counts.size(); i++) {
+        outputFile << searches_counts[i] << " " << searches[j] << endl;
+    	if (j == searches.size()-1) {
+	    j = 0;
+	}
+	else {
+	    j++;
+	}
+    }
+    outputFile.close();
+  }
+  else {
+    fprintf(stderr,"config: couldn't write to %s: %s\n",outfile.c_str(),strerror(errno));
+    return 0;
+  }
+  return 1;
+}
+
 void get_site(string site){
   //cout << "inside get_site" << endl;
   CURL *curl_handle;
@@ -153,7 +175,6 @@ void get_site(string site){
     pthread_mutex_unlock(&mutex);
   }
   curl_easy_cleanup(curl_handle);
-  //free(chunk.memory);
 }
 
 void * get_site_name(void * args){
@@ -182,6 +203,7 @@ void * find_words(void * args){
 
   int count = 0;
   string word;
+  searches_counts.clear();
   for (size_t i = 0; i < queue_search.size(); i++) {
     count = 0;
     word = searches[i];
@@ -190,38 +212,18 @@ void * find_words(void * args){
       count++;
       n = s.find(word, n+1);
     }
-    //cout << count << " " << word << endl;
     searches_counts.push_back(count);
     cout << "word: "<<word<<" count: "<<count<<endl;
+    stringstream ss;
+    ss << numFile;
+    string str = ss.str();
+    int result = write_to_output(str);
   }
-  cout << "done"<<endl;
+
   return 0;
   //write_to_output("1");
 }
 
-//not sure if there should be separate fcn for this (confused bout threading)
-int Config::write_to_output(string name){
-  string outfile = name + ".csv";
-  ofstream outputFile(outfile.c_str());
-  if (outputFile.is_open()) {
-    size_t j = 0;
-    for (size_t i = 0; i < searches_counts.size(); i++) {
-        outputFile << searches_counts[i] << " " << searches[j] << endl;
-    	if (j == searches.size()-1) {
-	    j = 0;
-	}
-	else {
-	    j++;
-	}
-    }
-    outputFile.close();
-  }
-  else {
-    fprintf(stderr,"config: couldn't write to %s: %s\n",outfile.c_str(),strerror(errno));
-    return 1;
-  }
-  return 0;
-}
 
 void push_sites_to_queue() {
   pthread_mutex_lock(&mutex);
