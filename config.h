@@ -140,30 +140,28 @@ void write_to_output(string name){
   string outfile = name + ".csv";
   ofstream outputFile(outfile.c_str());
   if (outputFile.is_open()) {
-    size_t j = 0;
+    //size_t j = 0;
     //outputFile << queue_word_counts.back().first << " "<<queue_word_counts.back().second<<endl;
-    for (size_t i = 0; i < limit; i++) {
-      //not writing to file
-      string tmpWord = queue_word_counts.front().first;
-      int tmpCount = queue_word_counts.front().second;
-      queue_word_counts.pop();
-      outputFile << tmpWord<<" "<<tmpCount <<endl;
-      /*outputFile << searches_counts[i] << " " << searches[j] << endl;
-      if (j == searches.size()-1) {
-	j = 0;
-      }
-      else {
-	j++;
-	}*/
+    for (int i = 0; i < limit; i++) {
+        //not writing to file
+        string tmpWord = queue_word_counts.front().first;
+        int tmpCount = queue_word_counts.front().second;
+        //queue_word_counts.pop(); // THIS LINE IS CAUSING SEGFAULT
+        outputFile << tmpWord<<" "<<tmpCount <<endl;
+        /*outputFile << searches_counts[i] << " " << searches[j] << endl;
+        if (j == searches.size()-1) {
+	        j = 0;
+        }
+        else {
+	        j++;
+	    }*/
     }
     outputFile.close();
   }
   else {
     fprintf(stderr,"config: couldn't write to %s: %s\n",outfile.c_str(),strerror(errno));
-    //return 0;
   }
   pthread_mutex_unlock(&mutex);
-  //return 1;
 }
 
 void get_site(string site){
