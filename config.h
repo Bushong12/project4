@@ -198,6 +198,7 @@ void * find_words(void * args){
   }
   string s = queue_data.back();
   queue_data.pop();
+  pthread_cond_broadcast(&consumer_signal);
   //datacount--;
   pthread_mutex_unlock(&mutex);
 
