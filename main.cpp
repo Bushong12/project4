@@ -5,7 +5,6 @@
 #include <sys/types.h>
 #include <cstdlib>
 #define MAX_THREAD 8
-const int NUM_SECONDS = 10;
 
 int main(int argc, char *argv[]){
   curl_global_init(CURL_GLOBAL_ALL);
@@ -43,7 +42,7 @@ int main(int argc, char *argv[]){
       pthread_create(&threads_p[j], NULL, find_words, NULL);
     }
     push_sites_to_queue();
-    sleep(5);
+    sleep(run.get_period_fetch());
   }
   //free(threads_f);
   //free(threads_p);
