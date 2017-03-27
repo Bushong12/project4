@@ -1,17 +1,33 @@
-Time:   Phrase:    Site:  Count
-time Notre   site    0
-time Cub Scouts   site    0
-time CSE30341   site    0
-time Operating   site    0
-time Systems   site    0
-time Striegel   site    0
-time Thain   site    0
-time the   site    149
-time Notre   site    112
-time Cub Scouts   site    0
-time CSE30341   site    0
-time Operating   site    0
-time Systems   site    0
-time Striegel   site    0
-time Thain   site    0
-time the   site    155
+Site,Time,Phrase,Count
+http://www.cnn.com/,2017-3-27 15:37:51
+,Notre,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,Cub Scouts,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,CSE30341,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,Operating,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,Systems,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,Striegel,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,Thain,0
+http://www.cnn.com/,2017-3-27 15:37:51
+,the,122
+http://www.nd.edu/,2017-3-27 15:37:51
+,Notre,107
+http://www.nd.edu/,2017-3-27 15:37:51
+,Cub Scouts,0
+http://www.nd.edu/,2017-3-27 15:37:51
+,CSE30341,0
+http://www.nd.edu/,2017-3-27 15:37:51
+,Operating,0
+http://www.nd.edu/,2017-3-27 15:37:51
+,Systems,0
+http://www.nd.edu/,2017-3-27 15:37:51
+,Striegel,0
+http://www.nd.edu/,2017-3-27 15:37:51
+,Thain,0
+http://www.nd.edu/,2017-3-27 15:37:51
+,the,153

@@ -157,7 +157,7 @@ void write_to_output(string name, string sitename){
             string tmpWord = queue_word_counts.front().first; 
             int tmpCount = queue_word_counts.front().second;
             queue_word_counts.pop();
-            outputFile << "time," <<  tmpWord << "," << sitename<<"," << tmpCount <<endl;
+            outputFile << sitename<< "," <<  tmpWord << "," << tmpCount <<endl;
         }
         outputFile.close();
     }
@@ -173,7 +173,7 @@ void initialize_output_file(string name) {
     ofstream outputFile;
     outputFile.open(outfile.c_str(), ios_base::trunc);  // erase contents in file before this
     if (outputFile.is_open()) {
-        outputFile << "Time,Phrase,Site,Count" << endl;
+        outputFile << "Site,Time,Phrase,Count" << endl;
         outputFile.close();
     }
     else {
@@ -182,16 +182,18 @@ void initialize_output_file(string name) {
     pthread_mutex_unlock(&mutex);
 }
 
-void get_time() {
+string get_time() {
     time_t t = time(0); // get time now
     struct tm * now = localtime( & t );
-    cout << (now->tm_year + 1900) << '-'
+    stringstream dt;
+    dt   << (now->tm_year + 1900) << '-'
          << (now->tm_mon + 1) << '-'
          << now->tm_mday << " "
          << (now->tm_hour + 1) << ':'
          << (now->tm_min + 1) << ':'
-         << (now-> tm_sec + 1)
-         << endl;
+         << (now-> tm_sec + 1);
+    string datetime = dt.str();
+    return datetime;
 }
 
 void get_site(string site){
@@ -218,7 +220,9 @@ void get_site(string site){
         //producer
         pthread_mutex_lock(&mutex);
         //queue_data.push(chunk.memory);
-	    queue_data.push(make_pair(site, chunk.memory));
+        //cout << get_time();
+        string csv_info = site + "," + get_time();
+	    queue_data.push(make_pair(csv_info, chunk.memory));
         //datacount++;
         pthread_cond_broadcast(&producer_signal);
         pthread_mutex_unlock(&mutex);

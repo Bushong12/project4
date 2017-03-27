@@ -39,7 +39,6 @@ int main(int argc, char *argv[]){
 
     threads_f = (pthread_t *)malloc(num_fetch*sizeof(*threads_f));
     threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
-    get_time();
     //run every period_fetch
     while(1){
         numFile++;

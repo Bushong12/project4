@@ -1,17 +1,17 @@
-Time:   Phrase:    Site:  Count
-time Notre   http://www.cnn.com/    0
-time Cub Scouts   http://www.cnn.com/    0
-time CSE30341   http://www.cnn.com/    0
-time Operating   http://www.cnn.com/    0
-time Systems   http://www.cnn.com/    0
-time Striegel   http://www.cnn.com/    0
-time Thain   http://www.cnn.com/    0
-time the   http://www.cnn.com/    123
-time Notre   http://www.nd.edu/    110
-time Cub Scouts   http://www.nd.edu/    0
-time CSE30341   http://www.nd.edu/    0
-time Operating   http://www.nd.edu/    0
-time Systems   http://www.nd.edu/    0
-time Striegel   http://www.nd.edu/    0
-time Thain   http://www.nd.edu/    0
-time the   http://www.nd.edu/    156
+Site,Time,Phrase,Count
+http://www.cnn.com/,2017-3-27 15:38:17,Notre,0
+http://www.cnn.com/,2017-3-27 15:38:17,Cub Scouts,0
+http://www.cnn.com/,2017-3-27 15:38:17,CSE30341,0
+http://www.cnn.com/,2017-3-27 15:38:17,Operating,0
+http://www.cnn.com/,2017-3-27 15:38:17,Systems,0
+http://www.cnn.com/,2017-3-27 15:38:17,Striegel,0
+http://www.cnn.com/,2017-3-27 15:38:17,Thain,0
+http://www.cnn.com/,2017-3-27 15:38:17,the,122
+http://www.nd.edu/,2017-3-27 15:38:18,Notre,110
+http://www.nd.edu/,2017-3-27 15:38:18,Cub Scouts,0
+http://www.nd.edu/,2017-3-27 15:38:18,CSE30341,0
+http://www.nd.edu/,2017-3-27 15:38:18,Operating,0
+http://www.nd.edu/,2017-3-27 15:38:18,Systems,0
+http://www.nd.edu/,2017-3-27 15:38:18,Striegel,0
+http://www.nd.edu/,2017-3-27 15:38:18,Thain,0
+http://www.nd.edu/,2017-3-27 15:38:18,the,156
