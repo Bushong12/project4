@@ -13,6 +13,7 @@
 #include <pthread.h>
 using namespace std;
 
+//global variables
 queue<string> queue_sites;
 queue<string> queue_search;
 queue<string> queue_data;
@@ -128,6 +129,12 @@ void Config::parse_site_file(){
   while(getline(infile, line)){
     sites.push_back(line);
   }
+}
+
+void Config::push_search_to_queue() {
+    for (size_t i = 0; i < searches.size(); i++) {
+        queue_search.push(searches[i]);
+    }
 }
 
 void write_to_output(string name){
@@ -264,10 +271,4 @@ void push_sites_to_queue() {
   }
   pthread_cond_broadcast(&consumer_signal);
   pthread_mutex_unlock(&mutex);
-}
-
-void Config::push_search_to_queue() {
-    for (size_t i = 0; i < searches.size(); i++) {
-        queue_search.push(searches[i]);
-    }
 }

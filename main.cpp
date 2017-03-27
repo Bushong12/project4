@@ -25,22 +25,27 @@ int main(int argc, char *argv[]){
 	printf("The number of threads should be between 1 and %d.\n", MAX_THREAD);
 	exit(1);
   }
+  //parse files
   run.parse_search_file();
   run.parse_site_file();
   run.push_search_to_queue();
 
   threads_f = (pthread_t *)malloc(num_fetch*sizeof(*threads_f));
   threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
+
+  //run every period_fetch
   while(1){
     numFile++;
+    //creating number of threads specified
     for(int i=0; i<run.get_fetch_threads(); i++){
-      cout << "creating fetch thread"<<endl;
+      //cout << "creating fetch thread"<<endl;
       pthread_create(&threads_f[i], NULL, get_site_name, NULL);
     }
     for(int j=0; j<run.get_parse_threads(); j++){
-      cout << "creating parse thread"<<endl;
+      //cout << "creating parse thread"<<endl;
       pthread_create(&threads_p[j], NULL, find_words, NULL);
     }
+    //populate sites queue
     push_sites_to_queue();
     sleep(run.get_period_fetch());
   }
