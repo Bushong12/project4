@@ -157,7 +157,7 @@ void write_to_output(string name, string sitename){
             string tmpWord = queue_word_counts.front().first; 
             int tmpCount = queue_word_counts.front().second;
             queue_word_counts.pop();
-            outputFile << "time " <<  tmpWord<<"   "<< sitename<<"    " << tmpCount <<endl;
+            outputFile << "time," <<  tmpWord << "," << sitename<<"," << tmpCount <<endl;
         }
         outputFile.close();
     }
@@ -173,7 +173,7 @@ void initialize_output_file(string name) {
     ofstream outputFile;
     outputFile.open(outfile.c_str(), ios_base::trunc);  // erase contents in file before this
     if (outputFile.is_open()) {
-        outputFile << "Time:   Phrase:    Site:  Count" << endl;
+        outputFile << "Time,Phrase,Site,Count" << endl;
         outputFile.close();
     }
     else {
@@ -218,7 +218,7 @@ void get_site(string site){
         //producer
         pthread_mutex_lock(&mutex);
         //queue_data.push(chunk.memory);
-	queue_data.push(make_pair(site, chunk.memory));
+	    queue_data.push(make_pair(site, chunk.memory));
         //datacount++;
         pthread_cond_broadcast(&producer_signal);
         pthread_mutex_unlock(&mutex);
@@ -247,7 +247,6 @@ void * find_words(void * args){
     while(queue_data.empty()){
         pthread_cond_wait(&producer_signal, &mutex);
     }
-    //string s = queue_data.back();
     string s = queue_data.back().second;
     string sitename = queue_data.back().first;
     queue_data.pop();
@@ -256,7 +255,6 @@ void * find_words(void * args){
 
     int count = 0;
     string word;
-    //searches_counts.clear();
     
     pthread_mutex_lock(&mutex); //LOCK: might not need?
     queue_word_counts.empty();
