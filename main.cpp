@@ -5,7 +5,13 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <cstdlib>
+#include <signal.h>
 #define MAX_THREAD 8
+
+int keepLooping = 1;
+void ourHandler(int num){
+  keepLooping = 0;
+}
 
 int main(int argc, char *argv[]){
     // initialize variables
@@ -40,7 +46,8 @@ int main(int argc, char *argv[]){
     threads_f = (pthread_t *)malloc(num_fetch*sizeof(*threads_f));
     threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
     //run every period_fetch
-    while(1){
+    while(keepLooping){
+        signal(SIGINT, ourHandler);
         numFile++;
         stringstream ss;
         ss << numFile;
@@ -61,7 +68,13 @@ int main(int argc, char *argv[]){
 	cout << "writing to "<<numFile<<".csv"<<endl;
         sleep(run.get_period_fetch());
     }
-
+    //graceful exit/cleanup
+    for(int i=0; i<run.get_fetch_threads(); i++){
+      pthread_join(threads_f[i], NULL);
+    }
+    for(int j=0; j<run.get_parse_threads(); j++){
+      pthread_join(threads_p[j], NULL);
+    }
     curl_global_cleanup();
     return 0;
 }
