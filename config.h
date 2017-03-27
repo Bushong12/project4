@@ -27,6 +27,8 @@ pthread_cond_t consumer_signal = PTHREAD_COND_INITIALIZER;
 pthread_cond_t third_signal = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex;
 int numFile = 0;
+int totParse = 0;
+int totFetch = 0;
 
 struct MemoryStruct {
     char *memory;
@@ -174,6 +176,9 @@ void write_to_output(string name, string sitename){
         fprintf(stderr,"config: couldn't write to %s: %s\n",outfile.c_str(),strerror(errno));
     }
     pthread_mutex_unlock(&mutex);
+    pthread_mutex_lock(&mutex);
+    totParse--;
+    pthread_mutex_unlock(&mutex);
 }
 
 //add header line to output file
@@ -238,6 +243,9 @@ void get_site(string site){
         pthread_mutex_unlock(&mutex);
     }
     curl_easy_cleanup(curl_handle);
+    pthread_mutex_lock(&mutex);
+    totFetch--;
+    pthread_mutex_unlock(&mutex);
 }
 
 void * get_site_name(void * args){

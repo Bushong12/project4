@@ -67,10 +67,16 @@ int main(int argc, char *argv[]){
         //creating number of threads specified
         for(int i=0; i<run.get_fetch_threads(); i++){
             pthread_create(&threads_f[i], NULL, get_site_name, NULL);
+            pthread_mutex_lock(&mutex);
+            totFetch++;
+            pthread_mutex_unlock(&mutex);
         }
 
         for(int j=0; j<run.get_parse_threads(); j++){
             pthread_create(&threads_p[j], NULL, find_words, NULL);
+            pthread_mutex_lock(&mutex);
+            totParse++;
+            pthread_mutex_unlock(&mutex);
         }
         
         //populate sites queue
@@ -79,12 +85,9 @@ int main(int argc, char *argv[]){
         sleep(run.get_period_fetch());
     }
     //graceful exit/cleanup
-    /*for(int i=0; i<run.get_fetch_threads(); i++){
-      pthread_join(threads_f[i], NULL);
+    while (totFetch != 0 || totParse != 0) {
+        // wait for threads to finish
     }
-    for(int j=0; j<run.get_parse_threads(); j++){
-      pthread_join(threads_p[j], NULL);
-    }*/
     curl_global_cleanup();
     return 0;
 }
