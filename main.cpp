@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include "config.h"
 #include <pthread.h>
 #include <sys/types.h>
@@ -38,19 +39,26 @@ int main(int argc, char *argv[]){
 
     threads_f = (pthread_t *)malloc(num_fetch*sizeof(*threads_f));
     threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
-
+    get_time();
     //run every period_fetch
     while(1){
         numFile++;
+        stringstream ss;
+        ss << numFile;
+        string str = ss.str();
+        initialize_output_file(str);
+
         //creating number of threads specified
         for(int i=0; i<run.get_fetch_threads(); i++){
             //cout << "creating fetch thread"<<endl;
             pthread_create(&threads_f[i], NULL, get_site_name, NULL);
         }
+
         for(int j=0; j<run.get_parse_threads(); j++){
             //cout << "creating parse thread"<<endl;
             pthread_create(&threads_p[j], NULL, find_words, NULL);
         }
+        
         //populate sites queue
         push_sites_to_queue();
         sleep(run.get_period_fetch());

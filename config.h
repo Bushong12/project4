@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <queue>
 #include <pthread.h>
+#include <ctime>
 using namespace std;
 
 //global variables
@@ -151,22 +152,11 @@ void write_to_output(string name){
     ofstream outputFile;       // initialize file
     outputFile.open(outfile.c_str(), ios_base::app);    // open the file to append to it
     if (outputFile.is_open()) {
-        //size_t j = 0;
-        //outputFile << queue_word_counts.back().first << " "<<queue_word_counts.back().second<<endl;
-        //queue_word_counts.pop();
         for (int i = 0; i < limit; i++) {         // for each site/ word combo
-            //not writing to file
             string tmpWord = queue_word_counts.front().first; 
             int tmpCount = queue_word_counts.front().second;
-            queue_word_counts.pop(); // THIS LINE IS CAUSING SEGFAULT // pops the front
-            outputFile << tmpWord<<" "<<tmpCount <<endl;
-            /*outputFile << searches_counts[i] << " " << searches[j] << endl;
-              if (j == searches.size()-1) {
-              j = 0;
-              }
-              else {
-              j++;
-              }*/
+            queue_word_counts.pop();
+            outputFile << "time " <<  tmpWord<<"   "<< "site    " << tmpCount <<endl;
         }
         outputFile.close();
     }
@@ -176,10 +166,32 @@ void write_to_output(string name){
     pthread_mutex_unlock(&mutex);
 }
 
-/*void initialize_output(string name) {
+void initialize_output_file(string name) {
     pthread_mutex_lock(&mutex);
-    ofstream outputF*/
+    string outfile = name + ".csv";
+    ofstream outputFile;
+    outputFile.open(outfile.c_str(), ios_base::trunc);  // erase contents in file before this
+    if (outputFile.is_open()) {
+        outputFile << "Time:   Phrase:    Site:  Count" << endl;
+        outputFile.close();
+    }
+    else {
+        fprintf(stderr, "config: couldn't write to %s: %s\n", outfile.c_str(), strerror(errno));
+    }
+    pthread_mutex_unlock(&mutex);
+}
 
+void get_time() {
+    time_t t = time(0); // get time now
+    struct tm * now = localtime( & t );
+    cout << (now->tm_year + 1900) << '-'
+         << (now->tm_mon + 1) << '-'
+         << now->tm_mday << " "
+         << (now->tm_hour + 1) << ':'
+         << (now->tm_min + 1) << ':'
+         << (now-> tm_sec + 1)
+         << endl;
+}
 
 void get_site(string site){
     //cout << "inside get_site" << endl;
@@ -219,7 +231,7 @@ void * get_site_name(void * args){
     while(queue_sites.empty()){
         pthread_cond_wait(&consumer_signal, &mutex);
     }
-    string site = queue_sites.front(); //check that this shoudl be back and not top
+    string site = queue_sites.front();
     queue_sites.pop();
     pthread_mutex_unlock(&mutex);
     get_site(site);
@@ -242,7 +254,7 @@ void * find_words(void * args){
     int count = 0;
     string word;
     //searches_counts.clear();
-    //
+    
     pthread_mutex_lock(&mutex); //LOCK: might not need?
     queue_word_counts.empty();
     cout << "new site: " << endl;
