@@ -17,7 +17,8 @@ using namespace std;
 //global variables
 queue<string> queue_sites;
 queue<string> queue_search;
-queue<string> queue_data;
+//queue<string> queue_data;
+queue<pair<string, string> > queue_data; //stores website name and its data
 queue<pair<string, int> > queue_word_counts;    // stores the search word and the count on a site
 vector<string> searches;
 vector<int> searches_counts;
@@ -138,7 +139,7 @@ void Config::push_search_to_queue() {
     }
 }
 
-void write_to_output(string name){
+void write_to_output(string name, string sitename){
     pthread_mutex_lock(&mutex);
     while(queue_word_counts.empty()){ // nothing to write
         pthread_cond_wait(&third_signal, &mutex);
@@ -156,7 +157,7 @@ void write_to_output(string name){
             string tmpWord = queue_word_counts.front().first; 
             int tmpCount = queue_word_counts.front().second;
             queue_word_counts.pop();
-            outputFile << "time " <<  tmpWord<<"   "<< "site    " << tmpCount <<endl;
+            outputFile << "time " <<  tmpWord<<"   "<< sitename<<"    " << tmpCount <<endl;
         }
         outputFile.close();
     }
@@ -216,7 +217,8 @@ void get_site(string site){
     else{
         //producer
         pthread_mutex_lock(&mutex);
-        queue_data.push(chunk.memory);
+        //queue_data.push(chunk.memory);
+	queue_data.push(make_pair(site, chunk.memory));
         //datacount++;
         pthread_cond_broadcast(&producer_signal);
         pthread_mutex_unlock(&mutex);
@@ -245,10 +247,11 @@ void * find_words(void * args){
     while(queue_data.empty()){
         pthread_cond_wait(&producer_signal, &mutex);
     }
-    string s = queue_data.back();
+    //string s = queue_data.back();
+    string s = queue_data.back().second;
+    string sitename = queue_data.back().first;
     queue_data.pop();
     pthread_cond_broadcast(&consumer_signal);
-    //datacount--;
     pthread_mutex_unlock(&mutex);
 
     int count = 0;
@@ -257,7 +260,7 @@ void * find_words(void * args){
     
     pthread_mutex_lock(&mutex); //LOCK: might not need?
     queue_word_counts.empty();
-    cout << "new site: " << endl;
+    cout << "new site: " <<sitename <<endl;
     
     // get file name
     stringstream ss;
@@ -281,7 +284,7 @@ void * find_words(void * args){
 
     pthread_cond_broadcast(&third_signal);
     pthread_mutex_unlock(&mutex); //UNLOCK
-    write_to_output(str);
+    write_to_output(str, sitename);
 
     return 0;
 }
