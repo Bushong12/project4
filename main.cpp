@@ -49,17 +49,16 @@ int main(int argc, char *argv[]){
 
         //creating number of threads specified
         for(int i=0; i<run.get_fetch_threads(); i++){
-            //cout << "creating fetch thread"<<endl;
             pthread_create(&threads_f[i], NULL, get_site_name, NULL);
         }
 
         for(int j=0; j<run.get_parse_threads(); j++){
-            //cout << "creating parse thread"<<endl;
             pthread_create(&threads_p[j], NULL, find_words, NULL);
         }
         
         //populate sites queue
         push_sites_to_queue();
+	cout << "writing to "<<numFile<<".csv"<<endl;
         sleep(run.get_period_fetch());
     }
 

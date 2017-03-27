@@ -17,7 +17,6 @@ using namespace std;
 //global variables
 queue<string> queue_sites;
 queue<string> queue_search;
-//queue<string> queue_data;
 queue<pair<string, string> > queue_data; //stores website name and its data
 queue<pair<string, int> > queue_word_counts;    // stores the search word and the count on a site
 vector<string> searches;
@@ -61,7 +60,6 @@ class Config {
         void parse_input_file(string fname);
         void parse_search_file();
         void parse_site_file();
-        //  int write_to_output(string num);
         void push_search_to_queue();
     private:
         int period_fetch;
@@ -145,9 +143,15 @@ void write_to_output(string name, string sitename){
         pthread_cond_wait(&third_signal, &mutex);
     }
 
-    cout << "writing to output"<<endl;
+    string delim = ",";
+    size_t pos = 0;
+    string site;
+    while((pos = sitename.find(delim)) != string::npos){
+      site = sitename.substr(0, pos);
+      sitename.erase(0, pos + delim.length());
+    }
+    string date = sitename;
 
-    //int limit = sites.size() * searches.size(); // for loop: total site/search combos 
     int limit = searches.size();
     string outfile = name + ".csv";             // set file name for this iteration
     ofstream outputFile;       // initialize file
@@ -157,7 +161,7 @@ void write_to_output(string name, string sitename){
             string tmpWord = queue_word_counts.front().first; 
             int tmpCount = queue_word_counts.front().second;
             queue_word_counts.pop();
-            outputFile << sitename<< "," <<  tmpWord << "," << tmpCount <<endl;
+            outputFile << date<< ","<<tmpWord<<"," <<site << "," << tmpCount <<endl;
         }
         outputFile.close();
     }
@@ -173,7 +177,7 @@ void initialize_output_file(string name) {
     ofstream outputFile;
     outputFile.open(outfile.c_str(), ios_base::trunc);  // erase contents in file before this
     if (outputFile.is_open()) {
-        outputFile << "Site,Time,Phrase,Count" << endl;
+        outputFile << "Time,Phrase,Site,Count" << endl;
         outputFile.close();
     }
     else {
@@ -219,11 +223,8 @@ void get_site(string site){
     else{
         //producer
         pthread_mutex_lock(&mutex);
-        //queue_data.push(chunk.memory);
-        //cout << get_time();
         string csv_info = site + "," + get_time();
-	    queue_data.push(make_pair(csv_info, chunk.memory));
-        //datacount++;
+	queue_data.push(make_pair(csv_info, chunk.memory));
         pthread_cond_broadcast(&producer_signal);
         pthread_mutex_unlock(&mutex);
     }
@@ -232,7 +233,6 @@ void get_site(string site){
 
 void * get_site_name(void * args){
     //consumer
-    cout << "inside get_site_name"<<endl;
     pthread_mutex_lock(&mutex);
     while(queue_sites.empty()){
         pthread_cond_wait(&consumer_signal, &mutex);
@@ -245,7 +245,6 @@ void * get_site_name(void * args){
 }
 
 void * find_words(void * args){
-    cout << "inside find_words"<<endl;
     //consumer
     pthread_mutex_lock(&mutex);
     while(queue_data.empty()){
@@ -262,7 +261,6 @@ void * find_words(void * args){
     
     pthread_mutex_lock(&mutex); //LOCK: might not need?
     queue_word_counts.empty();
-    cout << "new site: " <<sitename <<endl;
     
     // get file name
     stringstream ss;
@@ -278,10 +276,7 @@ void * find_words(void * args){
             count++;
             n = s.find(word, n+1);
         }
-        //searches_counts.push_back(count);
         queue_word_counts.push(make_pair(word, count));
-        cout << "word: "<<word<<" count: "<<count<<endl;
-        //cout << queue_word_counts.back().first << " "<<queue_word_counts.back().second<<endl;
     }
 
     pthread_cond_broadcast(&third_signal);
@@ -295,7 +290,6 @@ void * find_words(void * args){
 void push_sites_to_queue() {
     pthread_mutex_lock(&mutex);
     for (size_t i = 0; i < sites.size(); i++) {
-        cout << "pushing site to queue" << endl;
         queue_sites.push(sites[i]);
     }
     pthread_cond_broadcast(&consumer_signal);

@@ -1,33 +1,17 @@
-Site,Time,Phrase,Count
-http://www.cnn.com/,2017-3-27 15:37:41
-,Notre,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,Cub Scouts,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,CSE30341,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,Operating,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,Systems,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,Striegel,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,Thain,0
-http://www.cnn.com/,2017-3-27 15:37:41
-,the,122
-http://www.nd.edu/,2017-3-27 15:37:41
-,Notre,110
-http://www.nd.edu/,2017-3-27 15:37:41
-,Cub Scouts,0
-http://www.nd.edu/,2017-3-27 15:37:41
-,CSE30341,0
-http://www.nd.edu/,2017-3-27 15:37:41
-,Operating,0
-http://www.nd.edu/,2017-3-27 15:37:41
-,Systems,0
-http://www.nd.edu/,2017-3-27 15:37:41
-,Striegel,0
-http://www.nd.edu/,2017-3-27 15:37:41
-,Thain,0
-http://www.nd.edu/,2017-3-27 15:37:41
-,the,156
+Time,Phrase,Site,Count
+2017-3-27 15:53:56,Notre,http://www.cnn.com/,0
+2017-3-27 15:53:56,Cub Scouts,http://www.cnn.com/,0
+2017-3-27 15:53:56,CSE30341,http://www.cnn.com/,0
+2017-3-27 15:53:56,Operating,http://www.cnn.com/,0
+2017-3-27 15:53:56,Systems,http://www.cnn.com/,0
+2017-3-27 15:53:56,Striegel,http://www.cnn.com/,0
+2017-3-27 15:53:56,Thain,http://www.cnn.com/,0
+2017-3-27 15:53:56,the,http://www.cnn.com/,127
+2017-3-27 15:53:56,Notre,http://www.nd.edu/,113
+2017-3-27 15:53:56,Cub Scouts,http://www.nd.edu/,0
+2017-3-27 15:53:56,CSE30341,http://www.nd.edu/,0
+2017-3-27 15:53:56,Operating,http://www.nd.edu/,0
+2017-3-27 15:53:56,Systems,http://www.nd.edu/,0
+2017-3-27 15:53:56,Striegel,http://www.nd.edu/,0
+2017-3-27 15:53:56,Thain,http://www.nd.edu/,0
+2017-3-27 15:53:56,the,http://www.nd.edu/,155
