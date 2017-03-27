@@ -33,6 +33,7 @@ struct MemoryStruct {
     size_t size;
 };
 
+//curls website - taken from libcurl documentation
 static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp){
     size_t realsize = size * nmemb;
     struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -51,6 +52,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
     return realsize;
 }
 
+//class to parse files
 class Config {
     public:
         Config();
@@ -131,18 +133,21 @@ void Config::parse_site_file(){
     }
 }
 
+//populate search queue for find_words function
 void Config::push_search_to_queue() {
     for (size_t i = 0; i < searches.size(); i++) {
         queue_search.push(searches[i]);
     }
 }
 
+//writes to CSV files using condition variables/thread safety
 void write_to_output(string name, string sitename){
     pthread_mutex_lock(&mutex);
     while(queue_word_counts.empty()){ // nothing to write
         pthread_cond_wait(&third_signal, &mutex);
     }
 
+    //split string into site name and date
     string delim = ",";
     size_t pos = 0;
     string site;
@@ -153,7 +158,7 @@ void write_to_output(string name, string sitename){
     string date = sitename;
 
     int limit = searches.size();
-    string outfile = name + ".csv";             // set file name for this iteration
+    string outfile = name + ".csv"; // set file name for this iteration
     ofstream outputFile;       // initialize file
     outputFile.open(outfile.c_str(), ios_base::app);    // open the file to append to it
     if (outputFile.is_open()) {
@@ -171,6 +176,7 @@ void write_to_output(string name, string sitename){
     pthread_mutex_unlock(&mutex);
 }
 
+//add header line to output file
 void initialize_output_file(string name) {
     pthread_mutex_lock(&mutex);
     string outfile = name + ".csv";
@@ -186,6 +192,7 @@ void initialize_output_file(string name) {
     pthread_mutex_unlock(&mutex);
 }
 
+//get current time - used in get_site
 string get_time() {
     time_t t = time(0); // get time now
     struct tm * now = localtime( & t );
@@ -201,7 +208,6 @@ string get_time() {
 }
 
 void get_site(string site){
-    //cout << "inside get_site" << endl;
     CURL *curl_handle;
     CURLcode res;
 
@@ -224,8 +230,9 @@ void get_site(string site){
         //producer
         pthread_mutex_lock(&mutex);
         string csv_info = site + "," + get_time();
+	//queue_data contains site name, time, and website data
 	queue_data.push(make_pair(csv_info, chunk.memory));
-        pthread_cond_broadcast(&producer_signal);
+        pthread_cond_broadcast(&producer_signal); //signal to find_words
         pthread_mutex_unlock(&mutex);
     }
     curl_easy_cleanup(curl_handle);
@@ -234,7 +241,7 @@ void get_site(string site){
 void * get_site_name(void * args){
     //consumer
     pthread_mutex_lock(&mutex);
-    while(queue_sites.empty()){
+    while(queue_sites.empty()){ //no sites to search yet
         pthread_cond_wait(&consumer_signal, &mutex);
     }
     string site = queue_sites.front();
@@ -247,7 +254,7 @@ void * get_site_name(void * args){
 void * find_words(void * args){
     //consumer
     pthread_mutex_lock(&mutex);
-    while(queue_data.empty()){
+    while(queue_data.empty()){ //no data to parse yet
         pthread_cond_wait(&producer_signal, &mutex);
     }
     string s = queue_data.back().second;
@@ -259,7 +266,7 @@ void * find_words(void * args){
     int count = 0;
     string word;
     
-    pthread_mutex_lock(&mutex); //LOCK: might not need?
+    pthread_mutex_lock(&mutex);
     queue_word_counts.empty();
     
     // get file name
@@ -279,8 +286,8 @@ void * find_words(void * args){
         queue_word_counts.push(make_pair(word, count));
     }
 
-    pthread_cond_broadcast(&third_signal);
-    pthread_mutex_unlock(&mutex); //UNLOCK
+    pthread_cond_broadcast(&third_signal); //broadcast to CV in write_to_output
+    pthread_mutex_unlock(&mutex);
     write_to_output(str, sitename);
 
     return 0;
