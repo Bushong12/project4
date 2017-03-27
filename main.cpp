@@ -6,6 +6,9 @@
 #include <sys/types.h>
 #include <cstdlib>
 #include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #define MAX_THREAD 8
 
 int keepLooping = 1;
@@ -19,6 +22,11 @@ int main(int argc, char *argv[]){
     pthread_t *threads_f;
     pthread_t *threads_p;
     Config run;
+    struct sigaction sigIntHandler;
+
+    sigIntHandler.sa_handler = ourHandler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
 
     // check for correct arguments
     if (argc != 2) {
@@ -47,7 +55,9 @@ int main(int argc, char *argv[]){
     threads_p = (pthread_t *)malloc(num_parse*sizeof(*threads_p)); 
     //run every period_fetch
     while(keepLooping){
-        signal(SIGINT, ourHandler);
+        //signal(SIGINT, ourHandler);
+        //signal(SIGHUP, ourHandler);
+        sigaction(SIGINT, &sigIntHandler, NULL);
         numFile++;
         stringstream ss;
         ss << numFile;
@@ -69,12 +79,12 @@ int main(int argc, char *argv[]){
         sleep(run.get_period_fetch());
     }
     //graceful exit/cleanup
-    for(int i=0; i<run.get_fetch_threads(); i++){
+    /*for(int i=0; i<run.get_fetch_threads(); i++){
       pthread_join(threads_f[i], NULL);
     }
     for(int j=0; j<run.get_parse_threads(); j++){
       pthread_join(threads_p[j], NULL);
-    }
+    }*/
     curl_global_cleanup();
     return 0;
 }

@@ -222,6 +222,8 @@ void get_site(string site){
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
     curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
+    curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 30);
     res = curl_easy_perform(curl_handle);
     if(res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
@@ -230,8 +232,8 @@ void get_site(string site){
         //producer
         pthread_mutex_lock(&mutex);
         string csv_info = site + "," + get_time();
-	//queue_data contains site name, time, and website data
-	queue_data.push(make_pair(csv_info, chunk.memory));
+	    //queue_data contains site name, time, and website data
+	    queue_data.push(make_pair(csv_info, chunk.memory));
         pthread_cond_broadcast(&producer_signal); //signal to find_words
         pthread_mutex_unlock(&mutex);
     }
